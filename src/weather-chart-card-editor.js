@@ -344,6 +344,17 @@ class WeatherChartCardEditor extends LitElement {
             Chart style 2
           </label>
         </div>
+        <div class="switch-right">
+          <ha-radio
+            name="style"
+            value="style3"
+            @change="${this._handleStyleChange}"
+            .checked="${forecastConfig.style === 'style3'}"
+          ></ha-radio>
+          <label class="check-label">
+            Bar range
+          </label>
+        </div>
       </div>
 
         <!-- Buttons to switch between pages -->

@@ -508,65 +508,121 @@ drawChart({ config, language, weather, forecastItems } = this) {
   Chart.defaults.elements.point.radius = 2;
   Chart.defaults.elements.point.hitRadius = 10;
 
-  var datasets = [
-    {
-      label: this.ll('tempHi'),
-      type: 'line',
-      data: data.tempHigh,
-      yAxisID: 'TempAxis',
-      borderColor: config.forecast.temperature1_color,
-      backgroundColor: config.forecast.temperature1_color,
-    },
-    {
-      label: this.ll('tempLo'),
-      type: 'line',
-      data: data.tempLow,
-      yAxisID: 'TempAxis',
-      borderColor: config.forecast.temperature2_color,
-      backgroundColor: config.forecast.temperature2_color,
-    },
-    {
-      label: this.ll('precip'),
-      type: 'bar',
-      data: data.precip,
-      yAxisID: 'PrecipAxis',
-      borderColor: config.forecast.precipitation_color,
-      backgroundColor: config.forecast.precipitation_color,
-      barPercentage: config.forecast.precip_bar_size / 100,
-      categoryPercentage: 1.0,
-      datalabels: {
-        display: function (context) {
-          return context.dataset.data[context.dataIndex] > 0 ? 'true' : false;
+  var datasets;
+  if (config.forecast.style === 'style3') {
+    datasets = [
+      {
+        label: this.ll('tempHi'),
+        type: 'bar',
+        data: data.tempRange,
+        yAxisID: 'TempAxis',
+        borderColor: config.forecast.temperature1_color,
+        backgroundColor: config.forecast.temperature1_color,
+        borderSkipped: false,
+      },
+      {
+        label: this.ll('precip'),
+        type: 'bar',
+        data: data.precip,
+        yAxisID: 'PrecipAxis',
+        borderColor: config.forecast.precipitation_color,
+        backgroundColor: config.forecast.precipitation_color,
+        barPercentage: config.forecast.precip_bar_size / 100,
+        categoryPercentage: 1.0,
+        datalabels: {
+          display: function (context) {
+            return context.dataset.data[context.dataIndex] > 0 ? 'true' : false;
+          },
+          formatter: function (value, context) {
+            const precipitationType = config.forecast.precipitation_type;
+
+            const rainfall = context.dataset.data[context.dataIndex];
+            const probability = data.forecast[context.dataIndex].precipitation_probability;
+
+            let formattedValue;
+            if (precipitationType === 'rainfall') {
+              if (probability !== undefined && probability !== null && config.forecast.show_probability) {
+                formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}\n${Math.round(probability)}%`;
+              } else {
+                formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}`;
+              }
+            } else {
+              formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}`;
+            }
+
+            formattedValue = formattedValue.replace('\n', '\n\n');
+
+            return formattedValue;
+          },
+          textAlign: 'center',
+          textBaseline: 'middle',
+          align: 'top',
+          anchor: 'start',
+          offset: -10,
         },
-      formatter: function (value, context) {
-        const precipitationType = config.forecast.precipitation_type;
-
-        const rainfall = context.dataset.data[context.dataIndex];
-        const probability = data.forecast[context.dataIndex].precipitation_probability;
-
-        let formattedValue;
-        if (precipitationType === 'rainfall') {
-          if (probability !== undefined && probability !== null && config.forecast.show_probability) {
-	    formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}\n${Math.round(probability)}%`;
-          } else {
-            formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}`;
-          }
-        } else {
-          formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}`;
-        }
-
-        formattedValue = formattedValue.replace('\n', '\n\n');
-
-        return formattedValue;
       },
-        textAlign: 'center',
-        textBaseline: 'middle',
-        align: 'top',
-        anchor: 'start',
-        offset: -10,
+    ];
+  } else {
+    datasets = [
+      {
+        label: this.ll('tempHi'),
+        type: 'line',
+        data: data.tempHigh,
+        yAxisID: 'TempAxis',
+        borderColor: config.forecast.temperature1_color,
+        backgroundColor: config.forecast.temperature1_color,
       },
-    },
-  ];
+      {
+        label: this.ll('tempLo'),
+        type: 'line',
+        data: data.tempLow,
+        yAxisID: 'TempAxis',
+        borderColor: config.forecast.temperature2_color,
+        backgroundColor: config.forecast.temperature2_color,
+      },
+      {
+        label: this.ll('precip'),
+        type: 'bar',
+        data: data.precip,
+        yAxisID: 'PrecipAxis',
+        borderColor: config.forecast.precipitation_color,
+        backgroundColor: config.forecast.precipitation_color,
+        barPercentage: config.forecast.precip_bar_size / 100,
+        categoryPercentage: 1.0,
+        datalabels: {
+          display: function (context) {
+            return context.dataset.data[context.dataIndex] > 0 ? 'true' : false;
+          },
+          formatter: function (value, context) {
+            const precipitationType = config.forecast.precipitation_type;
+
+            const rainfall = context.dataset.data[context.dataIndex];
+            const probability = data.forecast[context.dataIndex].precipitation_probability;
+
+            let formattedValue;
+            if (precipitationType === 'rainfall') {
+              if (probability !== undefined && probability !== null && config.forecast.show_probability) {
+                formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}\n${Math.round(probability)}%`;
+              } else {
+                formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}`;
+              }
+            } else {
+              formattedValue = `${rainfall > 9 ? Math.round(rainfall) : rainfall.toFixed(1)} ${precipUnit}`;
+            }
+
+            formattedValue = formattedValue.replace('\n', '\n\n');
+
+            return formattedValue;
+          },
+          textAlign: 'center',
+          textBaseline: 'middle',
+          align: 'top',
+          anchor: 'start',
+          offset: -10,
+        },
+      },
+    ];
+  }
 
   const chart_text_color = (config.forecast.chart_text_color === 'auto') ? textColor : config.forecast.chart_text_color;
 
@@ -601,6 +657,24 @@ drawChart({ config, language, weather, forecastItems } = this) {
       backgroundColor: 'transparent',
       borderColor: 'transparent',
       color: chart_text_color || config.forecast.temperature2_color,
+      font: {
+        size: parseInt(config.forecast.labels_font_size) + 1,
+        lineHeight: 0.7,
+      },
+    };
+  } else if (config.forecast.style === 'style3') {
+    datasets[0].datalabels = {
+      display: function (context) {
+        return 'true';
+      },
+      formatter: function (value, context) {
+        return value[1] + '°\n' + value[0] + '°';
+      },
+      align: 'center',
+      anchor: 'center',
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
+      color: chart_text_color || config.forecast.temperature1_color,
       font: {
         size: parseInt(config.forecast.labels_font_size) + 1,
         lineHeight: 0.7,
@@ -754,6 +828,7 @@ computeForecastData({ config, forecastItems } = this) {
   var tempHigh = [];
   var tempLow = [];
   var precip = [];
+  var tempRange = [];
 
   for (var i = 0; i < forecast.length; i++) {
     var d = forecast[i];
@@ -768,6 +843,9 @@ computeForecastData({ config, forecastItems } = this) {
     if (typeof d.templow !== 'undefined') {
       tempLow.push(d.templow);
     }
+
+    const lowTemp = typeof d.templow !== 'undefined' ? d.templow : d.temperature;
+    tempRange.push([lowTemp, d.temperature]);
 
     if (roundTemp) {
       tempHigh[i] = Math.round(tempHigh[i]);
@@ -787,6 +865,7 @@ computeForecastData({ config, forecastItems } = this) {
     dateTime,
     tempHigh,
     tempLow,
+    tempRange,
     precip,
   }
 }
@@ -800,9 +879,14 @@ updateChart({ forecasts, forecastChart } = this) {
 
   if (forecastChart) {
     forecastChart.data.labels = data.dateTime;
-    forecastChart.data.datasets[0].data = data.tempHigh;
-    forecastChart.data.datasets[1].data = data.tempLow;
-    forecastChart.data.datasets[2].data = data.precip;
+    if (this.config.forecast.style === 'style3') {
+      forecastChart.data.datasets[0].data = data.tempRange;
+      forecastChart.data.datasets[1].data = data.precip;
+    } else {
+      forecastChart.data.datasets[0].data = data.tempHigh;
+      forecastChart.data.datasets[1].data = data.tempLow;
+      forecastChart.data.datasets[2].data = data.precip;
+    }
     forecastChart.update();
   }
 }
